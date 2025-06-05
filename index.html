@@ -362,12 +362,12 @@
         // --- Animation Logic (Manual Interpolation) ---
         let animationProgress = 0; // 0 to 1, across all stages
         const animationDurations = {
-            introFold: 2000,    // Stage 1
+            introFold: 2500,    // Stage 1 (Increased from 2000)
             hold: 1000,         // Stage 2
             morphTrigger: 500,  // Stage 3 (brief transition)
-            transformation: 2000, // Stage 4
+            transformation: 2500, // Stage 4 (Increased from 2000)
             finalPose: 1000,    // Stage 5 (initial fade-in)
-            totalAnimation: 6500 // Sum of above
+            totalAnimation: 7500 // Sum of above (updated)
         };
 
         function animateLogo(deltaTime) {
@@ -379,17 +379,17 @@
             // Stage 1: Intro Fold
             if (animationProgress <= animationDurations.introFold) {
                 const stageProgress = animationProgress / animationDurations.introFold;
-                // Changed starting scale from 0.001 to 0.1 for better initial visibility
-                const currentScale = THREE.MathUtils.lerp(0.1, 1.0, stageProgress);
+                // Changed starting scale from 0.1 to 0.3 for much better initial visibility
+                const currentScale = THREE.MathUtils.lerp(0.3, 1.0, stageProgress);
                 origamiMGroup.scale.set(currentScale, currentScale, currentScale);
                 origamiKGroup.scale.set(currentScale, currentScale, currentScale);
 
-                // Simple "folding" animation: rotate the diagonals slightly
-                origamiMGroup.children[2].rotation.z = THREE.MathUtils.lerp(-Math.PI / 2, -Math.PI / 4, stageProgress); // M diag 1
-                origamiMGroup.children[3].rotation.z = THREE.MathUtils.lerp(Math.PI / 2, Math.PI / 4, stageProgress);   // M diag 2
+                // Make the "folding" motion more pronounced by starting rotations from 0 (straight)
+                origamiMGroup.children[2].rotation.z = THREE.MathUtils.lerp(0, -Math.PI / 4, stageProgress); // M diag 1
+                origamiMGroup.children[3].rotation.z = THREE.MathUtils.lerp(0, Math.PI / 4, stageProgress);   // M diag 2
 
-                origamiKGroup.children[1].rotation.z = THREE.MathUtils.lerp(Math.PI / 2, Math.PI / 4, stageProgress);   // K diag 1
-                origamiKGroup.children[2].rotation.z = THREE.MathUtils.lerp(-Math.PI / 2, -Math.PI / 4, stageProgress); // K diag 2
+                origamiKGroup.children[1].rotation.z = THREE.MathUtils.lerp(0, Math.PI / 4, stageProgress);   // K diag 1
+                origamiKGroup.children[2].rotation.z = THREE.MathUtils.lerp(0, -Math.PI / 4, stageProgress); // K diag 2
 
             }
             // Stage 2: Hold (and initial glow pulse)
