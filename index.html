@@ -159,9 +159,10 @@
             // --- Event Listeners for Responsiveness and Camera Control ---
             window.addEventListener('resize', onWindowResize, false);
             document.addEventListener('mousedown', onDocumentMouseDown, false);
-            document.addEventListener('touchstart', onDocumentTouchStart, false);
+            // Added { passive: false } for touch events to allow preventDefault
+            document.addEventListener('touchstart', onDocumentTouchStart, { passive: false });
             document.addEventListener('mouseup', onDocumentMouseUp, false);
-            document.addEventListener('touchend', onDocumentTouchEnd, false);
+            document.addEventListener('touchend', onDocumentTouchEnd, { passive: false });
         }
 
         // --- Creation of 'M' and 'K' Letter Geometries ---
@@ -552,43 +553,28 @@
             if (particles) {
                 const positions = particles.geometry.attributes.position.array;
                 for (let i = 0; i < positions.length; i += 3) {
-                    // Store current values for robustness
-                    let currentX = positions[i];
-                    let currentY = positions[i + 1];
-                    let currentZ = positions[i + 2];
+                    // Calculate new positions based on current time
+                    let newX = positions[i] + Math.sin(time * 0.0001 + i) * 0.001;
+                    let newY = positions[i + 1] + Math.cos(time * 0.00015 + i) * 0.001;
+                    let newZ = positions[i + 2] + Math.sin(time * 0.00012 + i) * 0.001;
 
-                    // Check current values for NaN or Infinity before proceeding with calculation
-                    if (isNaN(currentX) || !isFinite(currentX) ||
-                        isNaN(currentY) || !isFinite(currentY) ||
-                        isNaN(currentZ) || !isFinite(currentZ)) {
-                        // If current position is invalid, reset it to a new random valid position
+                    // Verify calculated new positions for NaN or Infinity before assigning
+                    if (isFinite(newX) && isFinite(newY) && isFinite(newZ)) {
+                        positions[i] = newX;
+                        positions[i + 1] = newY;
+                        positions[i + 2] = newZ;
+                    } else {
+                        // If calculation resulted in invalid number, reset particle to a random valid position
                         positions[i] = (Math.random() * 2 - 1) * 15;
                         positions[i + 1] = (Math.random() * 2 - 1) * 15;
                         positions[i + 2] = (Math.random() * 2 - 1) * 15;
-                    } else {
-                        // Calculate new positions
-                        let newX = currentX + Math.sin(time * 0.0001 + i) * 0.001;
-                        let newY = currentY + Math.cos(time * 0.00015 + i) * 0.001;
-                        let newZ = currentZ + Math.sin(time * 0.00012 + i) * 0.001;
+                    }
 
-                        // Verify calculated new positions for NaN or Infinity before assigning
-                        if (isFinite(newX) && isFinite(newY) && isFinite(newZ)) {
-                            positions[i] = newX;
-                            positions[i + 1] = newY;
-                            positions[i + 2] = newZ;
-                        } else {
-                            // If calculation resulted in invalid number, reset particle
-                            positions[i] = (Math.random() * 2 - 1) * 15;
-                            positions[i + 1] = (Math.random() * 2 - 1) * 15;
-                            positions[i + 2] = (Math.random() * 2 - 1) * 15;
-                        }
-
-                        // Wrap particles if they go too far out, ensuring the new random position is always valid
-                        if (Math.abs(positions[i]) > 20 || Math.abs(positions[i+1]) > 20 || Math.abs(positions[i+2]) > 20) {
-                            positions[i] = (Math.random() * 2 - 1) * 15;
-                            positions[i + 1] = (Math.random() * 2 - 1) * 15;
-                            positions[i + 2] = (Math.random() * 2 - 1) * 15;
-                        }
+                    // Wrap particles if they go too far out, resetting to a new random valid position
+                    if (Math.abs(positions[i]) > 20 || Math.abs(positions[i+1]) > 20 || Math.abs(positions[i+2]) > 20) {
+                        positions[i] = (Math.random() * 2 - 1) * 15;
+                        positions[i + 1] = (Math.random() * 2 - 1) * 15;
+                        positions[i + 2] = (Math.random() * 2 - 1) * 15;
                     }
                 }
                 particles.geometry.attributes.position.needsUpdate = true;
@@ -633,15 +619,17 @@
         function onDocumentTouchStart(event) {
             if (!isAnimating && event.touches.length === 1) {
                 event.preventDefault();
+                // Adding { passive: false } directly to the event listener options
+                document.addEventListener('touchmove', onDocumentTouchMove, { passive: false });
+                document.addEventListener('touchend', onDocumentTouchEnd, { passive: false });
                 mouseX = event.touches[0].pageX;
                 mouseY = event.touches[0].pageY;
-                document.addEventListener('touchmove', onDocumentTouchMove, false);
-                document.addEventListener('touchend', onDocumentTouchEnd, false);
             }
         }
 
         function onDocumentTouchMove(event) {
             if (event.touches.length === 1) {
+                event.preventDefault(); // Ensure preventDefault is called here
                 const deltaX = event.touches[0].pageX - mouseX;
                 const deltaY = event.touches[0].pageY - mouseY;
 
@@ -654,8 +642,8 @@
         }
 
         function onDocumentTouchEnd(event) {
-            document.removeEventListener('touchmove', onDocumentTouchMove, false);
-            document.removeEventListener('touchend', onDocumentTouchEnd, false);
+            document.removeEventListener('touchmove', onDocumentTouchMove, { passive: false });
+            document.removeEventListener('touchend', onDocumentTouchEnd, { passive: false });
         }
 
     </script>
