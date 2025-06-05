@@ -84,7 +84,7 @@
             arGridMGroup, arGridKGroup,
             particles,
             cameraOrbit = false, mouseX = 0, mouseY = 0,
-            targetRotationX = 0, targetRotationY = 0,
+            targetRotationX = 0, targetRotationY = 0, // Explicitly initialize to 0
             isAnimating = true;
 
         // Color palette for materials
@@ -552,25 +552,38 @@
             if (particles) {
                 const positions = particles.geometry.attributes.position.array;
                 for (let i = 0; i < positions.length; i += 3) {
-                    // Check if current position is valid before attempting to update
+                    // Store current values for robustness
                     let currentX = positions[i];
                     let currentY = positions[i + 1];
                     let currentZ = positions[i + 2];
 
+                    // Check current values for NaN or Infinity before proceeding with calculation
                     if (isNaN(currentX) || !isFinite(currentX) ||
                         isNaN(currentY) || !isFinite(currentY) ||
                         isNaN(currentZ) || !isFinite(currentZ)) {
-                        // If any component is NaN or Infinity, reset particle to a new random valid position
+                        // If current position is invalid, reset it to a new random valid position
                         positions[i] = (Math.random() * 2 - 1) * 15;
                         positions[i + 1] = (Math.random() * 2 - 1) * 15;
                         positions[i + 2] = (Math.random() * 2 - 1) * 15;
                     } else {
-                        // Simple drift and slight noise
-                        positions[i] += Math.sin(time * 0.0001 + i) * 0.001;
-                        positions[i + 1] += Math.cos(time * 0.00015 + i) * 0.001;
-                        positions[i + 2] += Math.sin(time * 0.00012 + i) * 0.001;
+                        // Calculate new positions
+                        let newX = currentX + Math.sin(time * 0.0001 + i) * 0.001;
+                        let newY = currentY + Math.cos(time * 0.00015 + i) * 0.001;
+                        let newZ = currentZ + Math.sin(time * 0.00012 + i) * 0.001;
 
-                        // Wrap particles if they go too far out
+                        // Verify calculated new positions for NaN or Infinity before assigning
+                        if (isFinite(newX) && isFinite(newY) && isFinite(newZ)) {
+                            positions[i] = newX;
+                            positions[i + 1] = newY;
+                            positions[i + 2] = newZ;
+                        } else {
+                            // If calculation resulted in invalid number, reset particle
+                            positions[i] = (Math.random() * 2 - 1) * 15;
+                            positions[i + 1] = (Math.random() * 2 - 1) * 15;
+                            positions[i + 2] = (Math.random() * 2 - 1) * 15;
+                        }
+
+                        // Wrap particles if they go too far out, ensuring the new random position is always valid
                         if (Math.abs(positions[i]) > 20 || Math.abs(positions[i+1]) > 20 || Math.abs(positions[i+2]) > 20) {
                             positions[i] = (Math.random() * 2 - 1) * 15;
                             positions[i + 1] = (Math.random() * 2 - 1) * 15;
