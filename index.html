@@ -103,7 +103,7 @@
             // Camera: How we view the scene
             const aspectRatio = window.innerWidth / window.innerHeight;
             camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 1000);
-            camera.position.set(0, 0, 30); // Initial camera position
+            camera.position.set(0, 0, 20); // Camera brought closer to the logo (was 30)
             camera.lookAt(0, 0, 0); // Point camera at the center
 
             // Renderer: Where the magic happens (drawing the scene)
@@ -166,8 +166,8 @@
 
         // --- Creation of 'M' and 'K' Letter Geometries ---
         function createLetters() {
-            const barWidth = 0.8;
-            const barHeight = 6;
+            const barWidth = 1.0; // Increased bar width (was 0.8)
+            const barHeight = 8; // Increased bar height (was 6)
             const barDepth = 0.8;
             const diagonalAngle = Math.PI / 4; // 45 degrees
 
@@ -200,7 +200,8 @@
 
             // Reusable geometry for bars
             const barGeometry = new THREE.BoxGeometry(barWidth, barHeight, barDepth);
-            const diagonalGeometry = new THREE.BoxGeometry(barWidth, Math.sqrt(Math.pow(barHeight / 2, 2) * 2), barDepth);
+            const diagonalLength = Math.sqrt(Math.pow(barHeight / 2, 2) * 2); // Dynamic calculation based on new barHeight
+            const diagonalGeometry = new THREE.BoxGeometry(barWidth, diagonalLength, barDepth);
 
             // --- Create 'M' ---
             // Left vertical bar
@@ -221,22 +222,20 @@
 
             // Top-left to center diagonal bar
             const m_diag1_origami = new THREE.Mesh(diagonalGeometry, origamiMaterialSecondary);
-            m_diag1_origami.rotation.z = -diagonalAngle;
+            // Position adjusted based on new barHeight
             m_diag1_origami.position.set(-1, barHeight / 4, 0);
             origamiMGroup.add(m_diag1_origami);
             const m_diag1_arGrid = createWireframeAndNodes(diagonalGeometry, arGridMaterial, arNodeMaterial);
-            m_diag1_arGrid.rotation.z = -diagonalAngle;
             m_diag1_arGrid.position.set(-1, barHeight / 4, 0);
             arGridMGroup.add(m_diag1_arGrid);
 
 
             // Top-right to center diagonal bar
             const m_diag2_origami = new THREE.Mesh(diagonalGeometry, origamiMaterialSecondary);
-            m_diag2_origami.rotation.z = diagonalAngle;
+            // Position adjusted based on new barHeight
             m_diag2_origami.position.set(1, barHeight / 4, 0);
             origamiMGroup.add(m_diag2_origami);
             const m_diag2_arGrid = createWireframeAndNodes(diagonalGeometry, arGridMaterial, arNodeMaterial);
-            m_diag2_arGrid.rotation.z = diagonalAngle;
             m_diag2_arGrid.position.set(1, barHeight / 4, 0);
             arGridMGroup.add(m_diag2_arGrid);
 
@@ -254,17 +253,16 @@
 
             // Top-left to center diagonal bar
             const k_diag1_origami = new THREE.Mesh(diagonalGeometry, origamiMaterialSecondary);
-            k_diag1_origami.rotation.z = diagonalAngle;
+            // Position adjusted based on new barHeight
             k_diag1_origami.position.set(0.5, barHeight / 4, 0); // Adjusted position for K's diagonal
             origamiKGroup.add(k_diag1_origami);
             const k_diag1_arGrid = createWireframeAndNodes(diagonalGeometry, arGridMaterial, arNodeMaterial);
-            k_diag1_arGrid.rotation.z = diagonalAngle;
             k_diag1_arGrid.position.set(0.5, barHeight / 4, 0);
             arGridKGroup.add(k_diag1_arGrid);
 
             // Center to bottom-right diagonal bar
             const k_diag2_origami = new THREE.Mesh(diagonalGeometry, origamiMaterialSecondary);
-            k_diag2_origami.rotation.z = -diagonalAngle;
+            // Position adjusted based on new barHeight
             k_diag2_origami.position.set(0.5, -barHeight / 4, 0); // Adjusted position for K's diagonal
             origamiKGroup.add(k_diag2_origami);
             const k_diag2_arGrid = createWireframeAndNodes(diagonalGeometry, arGridMaterial, arNodeMaterial);
